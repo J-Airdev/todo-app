@@ -8,7 +8,7 @@ on:
 env:
   AWS_REGION: us-east-1
   # >>> CHANGE THIS LINE to your own ECR repository name. <<<
-  ECR_REPO: lab-test-a-pair1-ecr
+  ECR_REPO: PUT-YOUR-ECR-REPOSITORY-NAME-HERE
 
 jobs:
   build:
@@ -37,6 +37,7 @@ jobs:
           TAG=${GITHUB_SHA::7}
 
           docker build --build-arg APP_VERSION=$TAG -t $IMAGE:$TAG -t $IMAGE:latest .
+
           docker push $IMAGE:$TAG
           docker push $IMAGE:latest
 
@@ -61,11 +62,11 @@ jobs:
       - name: Tell the server to run the new image
         run: |
           aws ssm send-command \
-            --instance-ids ${{ vars.INSTANCE_ID }} \
+            --instance-ids "${{ vars.INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[
-              \"aws ecr get-login-password --region $AWS_REGION | docker login -u AWS --password-stdin $REGISTRY\",
-              \"docker pull $IMAGE:latest\",
-              \"docker rm -f todo || true\",
-              \"docker run -d --name todo --restart always -p 80:3001 $IMAGE:latest\"
-            ]"
+            --parameters 'commands=[
+              "aws ecr get-login-password --region '"$AWS_REGION"' | docker login -u AWS --password-stdin '"$REGISTRY"'",
+              "docker pull '"$IMAGE"':latest",
+              "docker rm -f todo || true",
+              "docker run -d --name todo --restart always -p 80:3001 '"$IMAGE"':latest"
+            ]'
