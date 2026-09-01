@@ -48,8 +48,7 @@ jobs:
 
 run: |
 aws ssm send-command \--instance-ids ${{ vars.INSTANCE_ID }} \--document-name "AWS-RunShellScript" \--parameters "commands=[
-\"aws ecr get-login-password --region $AWS_REGION | docker login -u AWS -
-password-stdin $REGISTRY\",
+\"aws ecr get-login-password --region $AWS_REGION | docker login -u AWS --password-stdin $REGISTRY\",
 \"docker pull $IMAGE:latest\",
 \"docker rm -f todo || true\",
 \"docker run -d --name todo --restart always -p 80:3001 $IMAGE:latest\"
