@@ -5,7 +5,6 @@ on:
   workflow_dispatch:
 env:
   AWS_REGION: us-east-1
-  # >>> CHANGE THIS LINE to your own ECR repository name. <<<
   ECR_REPO: lab-test-a-pair1-ecr
 jobs:
   build:
@@ -45,12 +44,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
       - name: Tell the server to run the new image
-
-run: |
-aws ssm send-command \--instance-ids ${{ vars.INSTANCE_ID }} \--document-name "AWS-RunShellScript" \--parameters "commands=[
-\"aws ecr get-login-password --region $AWS_REGION | docker login -u AWS -
-password-stdin $REGISTRY\",
-\"docker pull $IMAGE:latest\",
-\"docker rm -f todo || true\",
-\"docker run -d --name todo --restart always -p 80:3001 $IMAGE:latest\"
-]"
+        run: |
+          aws ssm send-command \
+            --instance-ids ${{ vars.INSTANCE_ID }} \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[
+              \"aws ecr get-login-password --region $AWS_REGION | docker login -u AWS --password-stdin $REGISTRY\",
+              \"docker pull $IMAGE:latest\",
+              \"docker rm -f todo || true\",
+              \"docker run -d --name todo --restart always -p 80:3001 $IMAGE:latest\"
+            ]"
+            
